@@ -42,16 +42,19 @@ public class LoginService {
     public UserAuthDto login(LoginRequest loginRequest) {
         String name = loginRequest.getName();
         String role = loginRequest.getRole();
-        if (role.equals("COACH")) {
-            return getCoachLoginResponse(name);
-        }
-        return getCrewLoginResponse(name);
-    }
 
-    private UserAuthDto getCoachLoginResponse(String name) {
         Coach coach = coachRepository.findByName(name)
                 .orElseGet(() -> saveCoachAndDefaultQuestions(name));
+        Crew crew = crewRepository.findByName(name)
+                .orElseGet(() -> saveCrew(name));
 
+        if (role.equals("COACH")) {
+            return getCoachLoginResponse(coach);
+        }
+        return getCrewLoginResponse(crew);
+    }
+
+    private UserAuthDto getCoachLoginResponse(Coach coach) {
         Map<String, Object> claims = Map.of("id", coach.getId(), "role", COACH);
         String accessToken = jwtTokenProvider.createToken(claims);
         String refreshToken = UUID.randomUUID().toString();
@@ -76,10 +79,7 @@ public class LoginService {
         return coach;
     }
 
-    private UserAuthDto getCrewLoginResponse(String name) {
-        Crew crew = crewRepository.findByName(name)
-                .orElseGet(() -> saveCrew(name));
-
+    private UserAuthDto getCrewLoginResponse(Crew crew) {
         Map<String, Object> claims = Map.of("id", crew.getId(), "role", CREW);
         String accessToken = jwtTokenProvider.createToken(claims);
         String refreshToken = UUID.randomUUID().toString();
