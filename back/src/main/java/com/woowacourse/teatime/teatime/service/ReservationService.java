@@ -34,7 +34,6 @@ import com.woowacourse.teatime.teatime.repository.CrewRepository;
 import com.woowacourse.teatime.teatime.repository.ReservationRepository;
 import com.woowacourse.teatime.teatime.repository.ScheduleRepository;
 import com.woowacourse.teatime.teatime.repository.SheetRepository;
-import com.woowacourse.teatime.teatime.service.dto.AlarmInfoDto;
 import com.woowacourse.teatime.teatime.service.dto.AlarmTargetDto;
 import com.woowacourse.teatime.util.Date;
 import java.time.LocalDate;
@@ -53,7 +52,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @Service
 public class ReservationService {
 
-    private final AlarmService alarmService;
     private final SheetService sheetService;
     private final ReservationRepository reservationRepository;
     private final CanceledReservationRepository canceledReservationRepository;
@@ -62,11 +60,6 @@ public class ReservationService {
     private final CoachRepository coachRepository;
     private final SheetRepository sheetRepository;
     private final CanceledSheetRepository canceledSheetRepository;
-
-    private void sendAlarm(Crew crew, Schedule schedule, AlarmTitle alarmTitle) {
-        AlarmInfoDto dto = AlarmInfoDto.of(schedule.getCoach(), crew, schedule.getLocalDateTime());
-        alarmService.send(dto, alarmTitle);
-    }
 
     private void cancelReservation(Reservation reservation, Role role) {
         CanceledReservation canceledReservation = CanceledReservation.from(reservation);
@@ -92,7 +85,6 @@ public class ReservationService {
         schedule.reserve();
         Reservation reservation = reservationRepository.save(new Reservation(schedule, crew));
         sheetService.save(reservation.getId());
-        sendAlarm(crew, schedule, AlarmTitle.APPLY);
 
         return reservation.getId();
     }
@@ -105,12 +97,9 @@ public class ReservationService {
         Boolean isApproved = reservationApproveRequest.getIsApproved();
         if (isApproved) {
             reservation.confirm();
-            sendAlarm(reservation.getCrew(), reservation.getSchedule(), AlarmTitle.CONFIRM);
             return;
         }
-
         cancelReservation(reservation, Role.COACH);
-        sendAlarm(reservation.getCrew(), reservation.getSchedule(), AlarmTitle.CANCEL);
     }
 
     public void cancel(Long reservationId, UserRoleDto userRoleDto) {
@@ -120,7 +109,6 @@ public class ReservationService {
         validateAuthorization(userRoleDto.getId(), role, reservation);
 
         cancelReservation(reservation, role);
-        sendAlarm(reservation.getCrew(), reservation.getSchedule(), AlarmTitle.CANCEL);
     }
 
     private void validateAuthorization(Long applicantId, Role role,
@@ -211,7 +199,6 @@ public class ReservationService {
             reservation.updateSheetStatusToSubmitted();
             AlarmTargetDto coachDto = AlarmTargetDto.alarmToCoach(reservation);
             AlarmTargetDto crewDto = AlarmTargetDto.alarmToCrew(reservation);
-            alarmService.alertSheetSubmitted(coachDto, crewDto);
         }
     }
 

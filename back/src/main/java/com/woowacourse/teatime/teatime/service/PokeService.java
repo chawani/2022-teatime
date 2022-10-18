@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PokeService {
 
-    private final PokeAlarmService alarmService;
     private final PokeRepository pokeRepository;
     private final CoachRepository coachRepository;
     private final CrewRepository crewRepository;
@@ -33,7 +32,6 @@ public class PokeService {
                 .orElseThrow(NotFoundCrewException::new);
 
         Poke savedPoke = pokeRepository.save(new Poke(crew, coach));
-        alarmService.sendPoke(crew.getName(), coach.getSlackId());
 
         return savedPoke.getId();
     }
