@@ -10,7 +10,7 @@ import org.springframework.data.redis.core.RedisHash;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
-@RedisHash(value = "refreshToken", timeToLive = 1209600)
+@RedisHash(value = "refreshToken", timeToLive = 10800)
 public class UserAuthInfo {
 
     @Id
