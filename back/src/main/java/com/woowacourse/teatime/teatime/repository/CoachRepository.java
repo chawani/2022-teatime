@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface CoachRepository extends JpaRepository<Coach, Long> {
 
+    Optional<Coach> findByName(String name);
+
     Optional<Coach> findByEmail(String email);
 
     @Query(name = "findCoaches", nativeQuery = true)

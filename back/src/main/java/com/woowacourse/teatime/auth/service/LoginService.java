@@ -8,7 +8,6 @@ import com.woowacourse.teatime.auth.controller.dto.LoginRequest;
 import com.woowacourse.teatime.auth.controller.dto.UserAuthDto;
 import com.woowacourse.teatime.auth.domain.UserAuthInfo;
 import com.woowacourse.teatime.auth.infrastructure.JwtTokenProvider;
-import com.woowacourse.teatime.auth.infrastructure.OpenIdAuth;
 import com.woowacourse.teatime.teatime.controller.dto.request.SheetQuestionUpdateRequest;
 import com.woowacourse.teatime.teatime.domain.Coach;
 import com.woowacourse.teatime.teatime.domain.Crew;
@@ -18,11 +17,8 @@ import com.woowacourse.teatime.teatime.service.QuestionService;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,50 +27,30 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LoginService {
 
-    private static final String COACH_EMAIL_DOMAIN = "woowahan";
+    private static final String DEFAULT_IMAGE = "https://avatars.slack-edge.com/2022-09-16/4091280804290_59b52a871e8a942a7969_192.png";
+    private static final String DEFAULT_SUFFIX_EMAIL = "@email.com";
     private static final String DEFAULT_QUESTION_1 = "이번 면담을 통해 논의하고 싶은 내용";
     private static final String DEFAULT_QUESTION_2 = "최근에 자신이 긍정적으로 보는 시도와 변화";
     private static final String DEFAULT_QUESTION_3 = "이번 면담을 통해 생기기를 원하는 변화";
 
-    private final OpenIdAuth openIdAuth;
     private final CrewRepository crewRepository;
     private final CoachRepository coachRepository;
     private final QuestionService questionService;
     private final UserAuthService userAuthService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Value("${coaches}")
-    private List<String> emails;
-
     public UserAuthDto login(LoginRequest loginRequest) {
-        String code = loginRequest.getCode();
-        String accessToken = openIdAuth.getAccessToken(code);
-        UserInfoDto userInfo = openIdAuth.getUserInfo(accessToken);
-        return getLoginResponse(userInfo);
-    }
-
-    private UserAuthDto getLoginResponse(UserInfoDto userInfo) {
-        String email = userInfo.getEmail();
-        String emailDomain = StringUtils.substringBetween(email, "@", ".");
-
-        List<String> emails = getEmails();
-        if (COACH_EMAIL_DOMAIN.equals(emailDomain) || emails.contains(email)) {
-            return getCoachLoginResponse(userInfo);
+        String name = loginRequest.getName();
+        String role = loginRequest.getRole();
+        if (role.equals("COACH")) {
+            return getCoachLoginResponse(name);
         }
-        return getCrewLoginResponse(userInfo);
+        return getCrewLoginResponse(name);
     }
 
-    private List<String> getEmails() {
-        return emails.stream()
-                .map(String::trim)
-                .collect(Collectors.toList());
-    }
-
-    private UserAuthDto getCoachLoginResponse(UserInfoDto userInfo) {
-        Coach coach = coachRepository.findByEmail(userInfo.getEmail())
-                .orElseGet(() -> saveCoachAndDefaultQuestions(userInfo));
-        coach.setSlackId(userInfo.getSlackId());
-        coach.setImage(userInfo.getImage());
+    private UserAuthDto getCoachLoginResponse(String name) {
+        Coach coach = coachRepository.findByName(name)
+                .orElseGet(() -> saveCoachAndDefaultQuestions(name));
 
         Map<String, Object> claims = Map.of("id", coach.getId(), "role", COACH);
         String accessToken = jwtTokenProvider.createToken(claims);
@@ -84,12 +60,12 @@ public class LoginService {
     }
 
     @NotNull
-    private Coach saveCoachAndDefaultQuestions(UserInfoDto userInfo) {
+    private Coach saveCoachAndDefaultQuestions(String name) {
         Coach coach = coachRepository.save(new Coach(
-                userInfo.getSlackId(),
-                userInfo.getName(),
-                userInfo.getEmail(),
-                userInfo.getImage()));
+                "UXXX01B38BC",
+                name,
+                name + DEFAULT_SUFFIX_EMAIL,
+                DEFAULT_IMAGE));
 
         List<SheetQuestionUpdateRequest> defaultQuestionDtos = List.of(
                 new SheetQuestionUpdateRequest(1, DEFAULT_QUESTION_1, true),
@@ -100,11 +76,9 @@ public class LoginService {
         return coach;
     }
 
-    private UserAuthDto getCrewLoginResponse(UserInfoDto userInfo) {
-        Crew crew = crewRepository.findByEmail(userInfo.getEmail())
-                .orElseGet(() -> saveCrew(userInfo));
-        crew.setSlackId(userInfo.getSlackId());
-        crew.setImage(userInfo.getImage());
+    private UserAuthDto getCrewLoginResponse(String name) {
+        Crew crew = crewRepository.findByName(name)
+                .orElseGet(() -> saveCrew(name));
 
         Map<String, Object> claims = Map.of("id", crew.getId(), "role", CREW);
         String accessToken = jwtTokenProvider.createToken(claims);
@@ -114,12 +88,12 @@ public class LoginService {
     }
 
     @NotNull
-    private Crew saveCrew(UserInfoDto userInfo) {
-        Crew newCrew = new Crew(
-                userInfo.getSlackId(),
-                userInfo.getName(),
-                userInfo.getEmail(),
-                userInfo.getImage());
-        return crewRepository.save(newCrew);
+    private Crew saveCrew(String name) {
+        Crew crew = new Crew(
+                "UXXX01B38BC",
+                name,
+                name + DEFAULT_SUFFIX_EMAIL,
+                DEFAULT_IMAGE);
+        return crewRepository.save(crew);
     }
 }

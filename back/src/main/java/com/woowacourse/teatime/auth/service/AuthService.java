@@ -44,7 +44,7 @@ public class AuthService {
     private List<String> emails;
 
     public LoginResponse login(LoginRequest loginRequest) {
-        String code = loginRequest.getCode();
+        String code = loginRequest.getName();
         String accessToken = openIdAuth.getAccessToken(code);
         UserInfoDto userInfo = openIdAuth.getUserInfo(accessToken);
         return getLoginResponse(userInfo);

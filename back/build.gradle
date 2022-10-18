@@ -118,41 +118,6 @@ tasks.named('test') {
     finalizedBy 'jacocoTestReport'
 }
 
-processResources.dependsOn('copySecret', 'copyDev1Secret', 'copyDev2Secret', 'copyProdSecret', 'copyTestSecret', 'copySlackWebHook')
-
-task copySecret(type: Copy) {
-    from '../config/application.yml'
-    into 'src/main/resources'
-}
-
-task copyDev1Secret(type: Copy) {
-    from '../config/application-dev1.yml'
-    into 'src/main/resources'
-}
-
-task copyDev2Secret(type: Copy) {
-    from '../config/application-dev2.yml'
-    into 'src/main/resources'
-}
-
-task copyProdSecret(type: Copy) {
-    from '../config/application-prod.yml'
-    into 'src/main/resources'
-}
-
-task copyTestSecret(type: Copy) {
-    from '../config/application-test.yml'
-    into 'src/test/resources'
-    rename {
-        String fileName -> fileName.replace('application-test', 'application')
-    }
-}
-
-task copySlackWebHook(type: Copy) {
-    from '../config/application-slack-web-hook.yml'
-    into 'src/main/resources'
-}
-
 jacoco {
     toolVersion = "0.8.7"
 }
