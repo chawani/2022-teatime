@@ -5,8 +5,11 @@ import com.woowacourse.teatime.teatime.controller.dto.request.CoachUpdateProfile
 import com.woowacourse.teatime.teatime.controller.dto.response.CoachFindResponse;
 import com.woowacourse.teatime.teatime.controller.dto.response.CoachProfileResponse;
 import com.woowacourse.teatime.teatime.domain.Coach;
+import com.woowacourse.teatime.teatime.domain.Crew;
 import com.woowacourse.teatime.teatime.exception.NotFoundCoachException;
+import com.woowacourse.teatime.teatime.exception.NotFoundCrewException;
 import com.woowacourse.teatime.teatime.repository.CoachRepository;
+import com.woowacourse.teatime.teatime.repository.CrewRepository;
 import com.woowacourse.teatime.teatime.repository.dto.CoachWithPossible;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +22,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class CoachService {
 
     private final CoachRepository coachRepository;
+    private final CrewRepository crewRepository;
 
     @Transactional(readOnly = true)
     public List<CoachFindResponse> findAll() {
         List<CoachWithPossible> coachWithPossibles = coachRepository.findCoaches();
         return CoachFindResponse.of(coachWithPossibles);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CoachFindResponse> findByName(Long crewId) {
+        Crew crew = crewRepository.findById(crewId)
+                .orElseThrow(NotFoundCrewException::new);
+        List<CoachWithPossible> coachMeWithPossible = coachRepository.findByNameWithPossible(crew.getName());
+        coachMeWithPossible.addAll(coachRepository.findCoaches());
+        return CoachFindResponse.of(coachMeWithPossible);
     }
 
     public Long save(CoachSaveRequest request) {

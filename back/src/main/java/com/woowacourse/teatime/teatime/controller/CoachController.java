@@ -30,7 +30,7 @@ public class CoachController {
 
     @GetMapping
     public ResponseEntity<List<CoachFindResponse>> findCoaches(@CrewAuthenticationPrincipal Long crewId) {
-        List<CoachFindResponse> responses = coachService.findAll();
+        List<CoachFindResponse> responses = coachService.findByName(crewId);
         return ResponseEntity.ok(responses);
     }
 

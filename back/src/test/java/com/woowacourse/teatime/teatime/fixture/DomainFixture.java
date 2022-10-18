@@ -38,6 +38,10 @@ public class DomainFixture {
         return new Coach("UXXXXNKM6UT", "제이슨", "jason@email.com", "image");
     }
 
+    public static Coach getCoachMe(String name) {
+        return new Coach("UXXXXNKM6UT", name, name + "@email.com", "image");
+    }
+
     public static Crew getCrew() {
         return new Crew("UXXXXNKM6UT", "마루", "maru@email.com", "image");
     }

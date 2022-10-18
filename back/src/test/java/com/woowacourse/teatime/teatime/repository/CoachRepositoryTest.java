@@ -1,6 +1,7 @@
 package com.woowacourse.teatime.teatime.repository;
 
 import static com.woowacourse.teatime.teatime.fixture.DomainFixture.getCoachJason;
+import static com.woowacourse.teatime.teatime.fixture.DomainFixture.getCoachMe;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -163,6 +164,31 @@ public class CoachRepositoryTest {
                 () -> assertThat(coaches).hasSize(1),
                 () -> assertThat(coaches.get(0).getName()).isEqualTo(coach.getName()),
                 () -> assertThat(coaches.get(0).getIsPossible()).isFalse()
+        );
+    }
+
+    @DisplayName("본인을 포함한 코치 목록을 조회한다.")
+    @Test
+    void findByNameWithPossible() {
+        // given
+        String name = "마루";
+        Coach coach = coachRepository.save(getCoachMe(name));
+
+        LocalDateTime before1 = LocalDateTime.now().minusMinutes(1);
+        LocalDateTime before2 = LocalDateTime.now().minusMinutes(1);
+        LocalDateTime tomorrow = LocalDateTime.now().plusDays(1);
+        Schedule schedule1 = scheduleRepository.save(new Schedule(coach, before1));
+        Schedule schedule2 = scheduleRepository.save(new Schedule(coach, before2));
+        Schedule schedule3 = scheduleRepository.save(new Schedule(coach, tomorrow));
+        schedule3.reserve();
+
+        // when
+        List<CoachWithPossible> coachWithPossible = coachRepository.findByNameWithPossible(name);
+
+        // then
+        assertAll(
+                () -> assertThat(coachWithPossible.get(0).getName()).isEqualTo(coach.getName()),
+                () -> assertThat(coachWithPossible.get(0).getIsPossible()).isFalse()
         );
     }
 }

@@ -37,7 +37,14 @@ import lombok.NoArgsConstructor;
         name = "findCoaches",
         query = "SELECT c.id AS id, c.name AS name, c.description AS description, c.image AS image, c.is_pokable AS isPokable, EXISTS ("
                 + "SELECT * FROM schedule s2 WHERE s2.coach_id = c.id AND s2.local_date_time > NOW() AND s2.is_possible = TRUE ) AS isPossible "
-                + "FROM coach c",
+                + "FROM coach c LIMIT 10",
+        resultSetMapping = "CoachWithPossibleMapping")
+@NamedNativeQuery(
+        name = "findByNameWithPossible",
+        query = "SELECT c.id AS id, c.name AS name, c.description AS description, c.image AS image, c.is_pokable AS isPokable, EXISTS ("
+                + "SELECT * FROM schedule s2 WHERE s2.coach_id = c.id AND s2.local_date_time > NOW() AND s2.is_possible = TRUE ) AS isPossible "
+                + "FROM coach c "
+                + "WHERE c.name = :name",
         resultSetMapping = "CoachWithPossibleMapping")
 public class Coach {
 

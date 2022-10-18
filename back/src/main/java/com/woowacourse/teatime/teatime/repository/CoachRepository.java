@@ -15,4 +15,7 @@ public interface CoachRepository extends JpaRepository<Coach, Long> {
 
     @Query(name = "findCoaches", nativeQuery = true)
     List<CoachWithPossible> findCoaches();
+
+    @Query(name = "findByNameWithPossible", nativeQuery = true)
+    List<CoachWithPossible> findByNameWithPossible(String name);
 }

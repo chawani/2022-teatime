@@ -1,6 +1,8 @@
 package com.woowacourse.teatime.teatime.service;
 
 import static com.woowacourse.teatime.teatime.fixture.DomainFixture.getCoachJason;
+import static com.woowacourse.teatime.teatime.fixture.DomainFixture.getCoachMe;
+import static com.woowacourse.teatime.teatime.fixture.DomainFixture.getCrew;
 import static com.woowacourse.teatime.teatime.fixture.DtoFixture.COACH_BROWN_SAVE_REQUEST;
 import static com.woowacourse.teatime.teatime.fixture.DtoFixture.COACH_JUNE_SAVE_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,7 +12,9 @@ import com.woowacourse.teatime.teatime.controller.dto.request.CoachUpdateProfile
 import com.woowacourse.teatime.teatime.controller.dto.response.CoachFindResponse;
 import com.woowacourse.teatime.teatime.controller.dto.response.CoachProfileResponse;
 import com.woowacourse.teatime.teatime.domain.Coach;
+import com.woowacourse.teatime.teatime.domain.Crew;
 import com.woowacourse.teatime.teatime.repository.CoachRepository;
+import com.woowacourse.teatime.teatime.repository.CrewRepository;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,6 +32,9 @@ public class CoachServiceTest {
     @Autowired
     private CoachRepository coachRepository;
 
+    @Autowired
+    private CrewRepository crewRepository;
+
     @DisplayName("코치 목록을 조회한다.")
     @Test
     void findAll() {
@@ -36,6 +43,22 @@ public class CoachServiceTest {
         List<CoachFindResponse> coaches = coachService.findAll();
 
         assertThat(coaches.size()).isEqualTo(2);
+    }
+
+    @DisplayName("나를 포함한 코치 목록을 조회한다.")
+    @Test
+    void findByName() {
+        coachService.save(COACH_BROWN_SAVE_REQUEST);
+        coachService.save(COACH_JUNE_SAVE_REQUEST);
+        Crew crew = crewRepository.save(getCrew());
+        coachRepository.save(getCoachMe(crew.getName()));
+
+        List<CoachFindResponse> coaches = coachService.findByName(crew.getId());
+
+        assertAll(
+                () -> assertThat(coaches.size()).isEqualTo(4),
+                () -> assertThat(coaches.get(0).getName()).isEqualTo("마루")
+        );
     }
 
     @DisplayName("자신의 프로필을 수정한다.")
