@@ -8,12 +8,23 @@ import com.woowacourse.teatime.auth.controller.dto.LoginRequest;
 import com.woowacourse.teatime.auth.controller.dto.UserAuthDto;
 import com.woowacourse.teatime.auth.domain.UserAuthInfo;
 import com.woowacourse.teatime.auth.infrastructure.JwtTokenProvider;
+import com.woowacourse.teatime.teatime.controller.dto.request.ReservationApproveRequest;
+import com.woowacourse.teatime.teatime.controller.dto.request.ReservationReserveRequest;
 import com.woowacourse.teatime.teatime.controller.dto.request.SheetQuestionUpdateRequest;
 import com.woowacourse.teatime.teatime.domain.Coach;
 import com.woowacourse.teatime.teatime.domain.Crew;
+import com.woowacourse.teatime.teatime.domain.Reservation;
+import com.woowacourse.teatime.teatime.domain.Schedule;
+import com.woowacourse.teatime.teatime.exception.NotFoundReservationException;
 import com.woowacourse.teatime.teatime.repository.CoachRepository;
 import com.woowacourse.teatime.teatime.repository.CrewRepository;
+import com.woowacourse.teatime.teatime.repository.ReservationRepository;
+import com.woowacourse.teatime.teatime.repository.ScheduleRepository;
 import com.woowacourse.teatime.teatime.service.QuestionService;
+import com.woowacourse.teatime.teatime.service.ReservationService;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -36,6 +47,9 @@ public class LoginService {
 
     private final CrewRepository crewRepository;
     private final CoachRepository coachRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final ReservationService reservationService;
+    private final ReservationRepository reservationRepository;
     private final QuestionService questionService;
     private final UserAuthService userAuthService;
     private final JwtTokenProvider jwtTokenProvider;
@@ -77,6 +91,26 @@ public class LoginService {
                 new SheetQuestionUpdateRequest(3, DEFAULT_QUESTION_3, true));
 
         questionService.update(coach.getId(), defaultQuestionDtos);
+
+        // 더미스케줄 저장
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate tomorrow = now.plusDays(1).toLocalDate();
+        LocalDate yesterday = now.minusDays(1).toLocalDate();
+        Schedule schedule1 = scheduleRepository.save(new Schedule(coach, LocalDateTime.of(tomorrow, LocalTime.of(9, 0))));
+        Schedule schedule2 = scheduleRepository.save(new Schedule(coach, LocalDateTime.of(tomorrow, LocalTime.of(10, 0))));
+        Schedule schedule3 = scheduleRepository.save(new Schedule(coach, LocalDateTime.of(yesterday, LocalTime.of(11, 0))));
+
+        Long reservationId1 = reservationService.save(629891L, new ReservationReserveRequest(schedule1.getId()));
+        Long reservationId2 = reservationService.save(629892L, new ReservationReserveRequest(schedule2.getId()));
+        Long reservationId3 = reservationService.save(629893L, new ReservationReserveRequest(schedule3.getId()));
+
+        reservationService.approve(coach.getId(), reservationId2, new ReservationApproveRequest(true));
+        reservationService.approve(coach.getId(), reservationId3, new ReservationApproveRequest(true));
+
+        Reservation reservation = reservationRepository.findById(reservationId3)
+                .orElseThrow(NotFoundReservationException::new);
+        reservation.updateReservationStatusToInProgress();
+
         return coach;
     }
 
