@@ -50,7 +50,7 @@ public class CoachService {
     public void updateProfile(Long coachId, CoachUpdateProfileRequest request) {
         Coach coach = coachRepository.findById(coachId)
                 .orElseThrow(NotFoundCoachException::new);
-        coach.modifyProfile(request.getName(), request.getDescription(), request.getIsPokable());
+        coach.modifyProfile(request.getDescription(), request.getIsPokable());
     }
 
     public CoachProfileResponse getProfile(Long coachId) {

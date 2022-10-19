@@ -80,16 +80,14 @@ public class Coach {
         this.isPokable = true;
     }
 
-    public void modifyProfile(String name, String description, Boolean isPokable) {
-        validateProfile(name, description, isPokable);
-        this.name = name.trim();
+    public void modifyProfile(String description, Boolean isPokable) {
+        validateProfile(description, isPokable);
         this.description = description.trim();
         this.isPokable = isPokable;
     }
 
-    private void validateProfile(String name, String description, Boolean isPokable) {
-        if ((name == null || name.isBlank())
-                || (description == null || description.isBlank())
+    private void validateProfile(String description, Boolean isPokable) {
+        if ((description == null || description.isBlank())
                 || isPokable == null) {
             throw new InvalidProfileInfoException();
         }

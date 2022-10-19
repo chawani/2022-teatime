@@ -27,7 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class LoginService {
 
-    private static final String DEFAULT_IMAGE = "https://avatars.slack-edge.com/2022-09-16/4091280804290_59b52a871e8a942a7969_192.png";
+    private static final String DEFAULT_COACH_IMAGE = "https://user-images.githubusercontent.com/52141636/196610751-f761f99d-8305-448a-81bf-3c920a0870b1.png";
+    private static final String DEFAULT_CREW_IMAGE = "https://avatars.slack-edge.com/2022-09-16/4091280804290_59b52a871e8a942a7969_192.png";
     private static final String DEFAULT_SUFFIX_EMAIL = "@email.com";
     private static final String DEFAULT_QUESTION_1 = "이번 면담을 통해 논의하고 싶은 내용";
     private static final String DEFAULT_QUESTION_2 = "최근에 자신이 긍정적으로 보는 시도와 변화";
@@ -68,7 +69,7 @@ public class LoginService {
                 "UXXX01B38BC",
                 name,
                 name + DEFAULT_SUFFIX_EMAIL,
-                DEFAULT_IMAGE));
+                DEFAULT_COACH_IMAGE));
 
         List<SheetQuestionUpdateRequest> defaultQuestionDtos = List.of(
                 new SheetQuestionUpdateRequest(1, DEFAULT_QUESTION_1, true),
@@ -93,7 +94,7 @@ public class LoginService {
                 "UXXX01B38BC",
                 name,
                 name + DEFAULT_SUFFIX_EMAIL,
-                DEFAULT_IMAGE);
+                DEFAULT_CREW_IMAGE);
         return crewRepository.save(crew);
     }
 }

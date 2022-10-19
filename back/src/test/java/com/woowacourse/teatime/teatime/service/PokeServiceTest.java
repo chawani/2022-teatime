@@ -55,7 +55,7 @@ class PokeServiceTest {
         // given
         Crew crew = crewRepository.save(getCrew());
         Coach coach = coachRepository.save(getCoachJason());
-        coach.modifyProfile(coach.getName(), coach.getDescription(), false);
+        coach.modifyProfile(coach.getDescription(), false);
 
         // when
         PokeSaveRequest request = new PokeSaveRequest(coach.getId());

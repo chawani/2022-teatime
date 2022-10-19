@@ -68,16 +68,12 @@ public class CoachServiceTest {
         Coach coach = coachRepository.save(getCoachJason());
 
         // when
-        String expectedName = "name";
         String expectedDescription = "안뇽하세요.";
         coachService.updateProfile(coach.getId(),
-                new CoachUpdateProfileRequest(expectedName, expectedDescription, true));
+                new CoachUpdateProfileRequest(getCoachJason().getName(), expectedDescription, true));
 
         // then
-        assertAll(
-                () -> assertThat(coach.getName()).isEqualTo(expectedName),
-                () -> assertThat(coach.getDescription()).isEqualTo(expectedDescription)
-        );
+        assertThat(coach.getDescription()).isEqualTo(expectedDescription);
     }
 
     @DisplayName("자신의 프로필을 조회한다.")
