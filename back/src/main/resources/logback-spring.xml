@@ -32,6 +32,23 @@
         </logger>
     </springProfile>
 
+    <springProfile name="demo">
+        <include resource="logback/file-info-appender.xml"/>
+        <include resource="logback/demo-warn-appender.xml"/>
+        <include resource="logback/slack/demo-slack-alarm-appender.xml"/>
+
+        <logger name="com.woowacourse.teatime" level="INFO">
+            <appender-ref ref="FILE-INFO"/>
+            <appender-ref ref="DEMO-WARN"/>
+            <appender-ref ref="DEMO_ASYNC_SLACK"/>
+        </logger>
+
+        <logger name="org.springframework" level="INFO">
+            <appender-ref ref="FILE-INFO"/>
+            <appender-ref ref="DEMO-WARN"/>
+            <appender-ref ref="DEMO_ASYNC_SLACK"/>
+        </logger>
+    </springProfile>
 
     <springProfile name="prod">
         <include resource="logback/file-info-appender.xml"/>
