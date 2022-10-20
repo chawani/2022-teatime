@@ -33,7 +33,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://localhost:8080",
                         "https://dev.teatime.pe.kr",
                         "https://teatime.pe.kr",
-                        "http://teatime.pe.kr"
+                        "http://teatime.pe.kr",
+                        "http://demo.teatime.pe.kr",
+                        "https://demo.teatime.pe.kr"
                 )
                 .allowCredentials(true)
                 .allowedMethods(ALLOWED_METHOD_NAMES.split(","))
